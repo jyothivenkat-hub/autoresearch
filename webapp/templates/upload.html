@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Upload Data - Twitter Optimizer{% endblock %}
+{% block content %}
+<h2>Upload Twitter Analytics</h2>
+
+<div class="card">
+    <h4>How to get your data</h4>
+    <ol>
+        <li>Go to <a href="https://analytics.x.com" target="_blank">analytics.x.com</a></li>
+        <li>Click the <strong>Posts</strong> tab</li>
+        <li>Click <strong>Export data</strong> (top right)</li>
+        <li>Download the CSV and upload it below</li>
+    </ol>
+</div>
+
+<form method="POST" enctype="multipart/form-data" style="margin-top: 1.5rem;">
+    <label for="csv_file">Select your Twitter analytics CSV:</label>
+    <input type="file" id="csv_file" name="csv_file" accept=".csv" required>
+    <button type="submit">Upload & Analyze</button>
+</form>
+{% endblock %}

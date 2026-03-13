@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Analysis - Twitter Optimizer{% endblock %}
+{% block content %}
+<h2>Analysis Results</h2>
+<p>{{ upload.row_count }} posts from <strong>{{ upload.filename }}</strong></p>
+
+<!-- Summary Stats -->
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="number">{{ "{:,}".format(analysis.summary.total_impressions) }}</div>
+        <div class="label">Total Impressions</div>
+    </div>
+    <div class="stat-card">
+        <div class="number">{{ analysis.summary.avg_impressions }}</div>
+        <div class="label">Avg Impressions / Post</div>
+    </div>
+    <div class="stat-card">
+        <div class="number">{{ analysis.summary.avg_likes }}</div>
+        <div class="label">Avg Likes / Post</div>
+    </div>
+    <div class="stat-card">
+        <div class="number">{{ analysis.summary.total_follows }}</div>
+        <div class="label">New Followers</div>
+    </div>
+</div>
+
+<!-- Post Type Breakdown -->
+<h3>Post Type Breakdown</h3>
+<table>
+    <thead>
+        <tr><th>Type</th><th>Count</th><th>Avg Impressions</th><th>Avg Likes</th><th>Avg Follows</th></tr>
+    </thead>
+    <tbody>
+        {% for type, stats in analysis.post_type_breakdown.items() %}
+        <tr>
+            <td><strong>{{ type }}</strong></td>
+            <td>{{ stats.count }}</td>
+            <td>{{ stats.avg_impressions }}</td>
+            <td>{{ stats.avg_likes }}</td>
+            <td>{{ stats.avg_follows }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Feature Analysis -->
+<h3>What Boosts Performance</h3>
+<table>
+    <thead>
+        <tr><th>Feature</th><th>With (avg imp)</th><th>Without (avg imp)</th><th>Multiplier</th></tr>
+    </thead>
+    <tbody>
+        {% for name, data in analysis.feature_analysis.items() %}
+        <tr>
+            <td><strong>{{ name }}</strong></td>
+            <td>{{ data.with.avg_impressions|int }} ({{ data.with.count }} posts)</td>
+            <td>{{ data.without.avg_impressions|int }} ({{ data.without.count }} posts)</td>
+            <td><span class="multiplier">{{ data.multiplier }}x</span></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Day of Week -->
+{% if analysis.day_of_week %}
+<h3>Day of Week Performance</h3>
+<table>
+    <thead>
+        <tr><th>Day</th><th>Posts</th><th>Avg Impressions</th><th>Avg Likes</th><th>Avg Follows</th></tr>
+    </thead>
+    <tbody>
+        {% for day, stats in analysis.day_of_week.items() %}
+        <tr>
+            <td><strong>{{ day }}</strong></td>
+            <td>{{ stats.posts }}</td>
+            <td>{{ stats.avg_impressions }}</td>
+            <td>{{ stats.avg_likes }}</td>
+            <td>{{ stats.avg_follows }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+<!-- Text Length -->
+<h3>Text Length vs Performance</h3>
+<table>
+    <thead>
+        <tr><th>Length</th><th>Count</th><th>Avg Impressions</th></tr>
+    </thead>
+    <tbody>
+        {% for bucket, stats in analysis.text_length.items() %}
+        <tr>
+            <td>{{ bucket }}</td>
+            <td>{{ stats.count }}</td>
+            <td>{{ stats.avg_impressions }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Top Posts -->
+<h3>Top 10 Posts by Impressions</h3>
+{% for post in analysis.top_by_impressions %}
+<div class="tweet-card">
+    <div class="tweet-text">{{ post['Post text'] }}</div>
+    <div class="meta">
+        {{ "{:,}".format(post.Impressions) }} impressions &middot;
+        {{ post.Likes }} likes &middot;
+        {{ post['New follows'] }} follows &middot;
+        <span class="badge badge-impressions">{{ post.post_type }}</span>
+    </div>
+</div>
+{% endfor %}
+
+<h3>Top 10 Posts by Followers Gained</h3>
+{% for post in analysis.top_by_follows %}
+<div class="tweet-card">
+    <div class="tweet-text">{{ post['Post text'] }}</div>
+    <div class="meta">
+        {{ post['New follows'] }} follows &middot;
+        {{ "{:,}".format(post.Impressions) }} impressions &middot;
+        {{ post.Likes }} likes &middot;
+        <span class="badge badge-follows">{{ post.post_type }}</span>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
