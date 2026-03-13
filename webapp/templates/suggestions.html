@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Daily Suggestions - Twitter Optimizer{% endblock %}
+{% block content %}
+<h2>Daily Post Suggestions</h2>
+
+{% if not upload %}
+<div class="card"><p>Please <a href="/upload">upload your Twitter data</a> first.</p></div>
+{% else %}
+
+<button onclick="generateSuggestions()">Generate Today's Suggestions</button>
+
+<div class="loading" id="sug-loading">
+    <p aria-busy="true">Generating suggestions... ~15 seconds.</p>
+</div>
+
+<div id="new-suggestions"></div>
+
+{% if suggestions %}
+<h3 style="margin-top: 2rem;">All Suggestions</h3>
+{% for s in suggestions %}
+<div class="tweet-card" id="sug-{{ s.id }}" style="{% if s.used %}opacity: 0.5;{% endif %}">
+    <div class="tweet-text">{{ s.tweet_text }}</div>
+    <div class="meta">
+        <span class="badge badge-{{ s.target_metric }}">{{ s.target_metric }}</span>
+        <strong>{{ s.strategy }}</strong> &middot;
+        {{ s.reasoning[:100] }}{% if s.reasoning|length > 100 %}...{% endif %}
+        &middot; <small>{{ s.created_at }}</small>
+    </div>
+    <div style="margin-top: 0.5rem;">
+        {% if not s.used %}
+        <button class="outline" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;"
+                onclick="markUsed({{ s.id }})">Mark as Posted</button>
+        <button class="outline secondary" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;"
+                onclick="copyTweet(this, `{{ s.tweet_text|e }}`)">Copy</button>
+        {% else %}
+        <small style="color: #16a34a;">Posted</small>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function generateSuggestions() {
+    showLoading('sug-loading');
+    document.getElementById('new-suggestions').innerHTML = '';
+
+    try {
+        const data = await apiPost('/suggestions/generate');
+        if (data.suggestions && data.suggestions.length > 0) {
+            let html = '<h3>New Suggestions</h3>';
+            for (const s of data.suggestions) {
+                const metric = s.target_metric || 'engagement';
+                html += `<div class="tweet-card">
+                    <div class="tweet-text">${s.tweet}</div>
+                    <div class="meta">
+                        <span class="badge badge-${metric}">${metric}</span>
+                        <strong>${s.strategy || ''}</strong> &middot;
+                        ${s.reasoning || ''}
+                    </div>
+                    <div style="margin-top: 0.5rem;">
+                        <button class="outline secondary" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;"
+                                onclick="copyTweet(this, \`${s.tweet.replace(/`/g, "'")}\`)">Copy</button>
+                    </div>
+                </div>`;
+            }
+            document.getElementById('new-suggestions').innerHTML = html;
+        } else {
+            document.getElementById('new-suggestions').innerHTML =
+                '<div class="flash-msg">No suggestions generated. Try again.</div>';
+        }
+    } catch (e) {
+        document.getElementById('new-suggestions').innerHTML =
+            '<div class="flash-msg error">Error: ' + e.message + '</div>';
+    }
+
+    hideLoading('sug-loading');
+}
+
+async function markUsed(id) {
+    await apiPost(`/suggestions/${id}/used`);
+    const el = document.getElementById('sug-' + id);
+    el.style.opacity = '0.5';
+    el.querySelector('button').outerHTML = '<small style="color: #16a34a;">Posted</small>';
+}
+
+function copyTweet(btn, text) {
+    navigator.clipboard.writeText(text);
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+}
+</script>
+{% endblock %}

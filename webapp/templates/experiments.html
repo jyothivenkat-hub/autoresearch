@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Experiments - Twitter Optimizer{% endblock %}
+{% block content %}
+<h2>Run Experiments</h2>
+
+{% if not upload %}
+<div class="card"><p>Please <a href="/upload">upload your Twitter data</a> first.</p></div>
+{% else %}
+
+<!-- Experiment Selection -->
+<div class="card">
+    <h4>Select experiments to run</h4>
+    <form id="experiment-form">
+        {% for exp in experiments %}
+        <label>
+            <input type="checkbox" name="experiments" value="{{ exp.name }}">
+            <strong>{{ exp.description }}</strong>
+        </label>
+        {% endfor %}
+        <hr>
+        <label><strong>Custom experiment (optional):</strong></label>
+        <textarea id="custom-prompt" placeholder="Describe what you want to test... e.g., 'Generate 5 tweets about AI tools that use humor and are under 100 characters'" rows="3"></textarea>
+        <br>
+        <button type="button" onclick="runExperiments()">Run Selected Experiments</button>
+        <button type="button" class="secondary" onclick="runAll()">Run All</button>
+    </form>
+</div>
+
+<div class="loading" id="exp-loading">
+    <p aria-busy="true">Running experiments... this may take 1-2 minutes.</p>
+</div>
+
+<div id="results-container"></div>
+
+<!-- Past Experiments -->
+{% if past_experiments %}
+<h3 style="margin-top: 2rem;">Previous Experiments</h3>
+{% for exp in past_experiments %}
+<details class="card">
+    <summary>
+        <strong>{{ exp.experiment_name }}</strong> &middot;
+        {{ exp.description[:80] }} &middot;
+        <small>{{ exp.created_at }}</small>
+    </summary>
+    <div style="margin-top: 1rem;">
+        {% set data = exp.result_json | tojson | safe %}
+        <pre style="white-space: pre-wrap; font-size: 0.85rem;">{{ exp.result_json }}</pre>
+    </div>
+</details>
+{% endfor %}
+{% endif %}
+
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function getSelected() {
+    const boxes = document.querySelectorAll('input[name="experiments"]:checked');
+    return Array.from(boxes).map(b => b.value);
+}
+
+function runAll() {
+    document.querySelectorAll('input[name="experiments"]').forEach(b => b.checked = true);
+    runExperiments();
+}
+
+async function runExperiments() {
+    const selected = getSelected();
+    const custom = document.getElementById('custom-prompt').value.trim();
+
+    if (selected.length === 0 && !custom) {
+        alert('Select at least one experiment or enter a custom prompt.');
+        return;
+    }
+
+    showLoading('exp-loading');
+    document.getElementById('results-container').innerHTML = '';
+
+    try {
+        const data = await apiPost('/experiments/run', {
+            experiments: selected,
+            custom_prompt: custom
+        });
+
+        let html = '<h3>Results</h3>';
+        for (const result of data.results) {
+            html += renderResult(result);
+        }
+        document.getElementById('results-container').innerHTML = html;
+    } catch (e) {
+        document.getElementById('results-container').innerHTML =
+            '<div class="flash-msg error">Error: ' + e.message + '</div>';
+    }
+
+    hideLoading('exp-loading');
+}
+
+function renderResult(result) {
+    let html = `<div class="card">
+        <h4>${result.description || result.name}</h4>
+        <small>Completed in ${result.time_seconds}s</small>`;
+
+    if (result.status === 'error') {
+        html += `<p style="color: red;">${result.message}</p>`;
+    } else if (result.data && Array.isArray(result.data)) {
+        for (const item of result.data) {
+            html += '<div class="tweet-card">';
+            if (item.tweet) {
+                html += `<div class="tweet-text">${item.tweet}</div>`;
+            } else if (item.template) {
+                html += `<div class="tweet-text">${item.template}</div>`;
+            } else if (item.original) {
+                html += `<div class="tweet-text"><strong>Original:</strong> ${item.original}</div>`;
+                if (item.variation_a) html += `<div class="meta">A: ${item.variation_a}</div>`;
+                if (item.variation_b) html += `<div class="meta">B: ${item.variation_b}</div>`;
+                if (item.variation_c) html += `<div class="meta">C: ${item.variation_c}</div>`;
+            } else if (item.target) {
+                html += `<div class="tweet-text"><strong>${item.target}</strong></div>`;
+                if (item.topic_reply) html += `<div class="meta">Topic reply: ${item.topic_reply}</div>`;
+                if (item.launch_reply) html += `<div class="meta">Launch reply: ${item.launch_reply}</div>`;
+            }
+            for (const [key, val] of Object.entries(item)) {
+                if (!['tweet','template','original','variation_a','variation_b','variation_c',
+                       'target','topic_reply','launch_reply','ai_reply'].includes(key)) {
+                    let badgeClass = '';
+                    if (val === 'impressions') badgeClass = 'badge-impressions';
+                    else if (val === 'follows') badgeClass = 'badge-follows';
+                    else if (val === 'engagement') badgeClass = 'badge-engagement';
+
+                    if (badgeClass) {
+                        html += `<span class="badge ${badgeClass}">${val}</span> `;
+                    } else if (typeof val === 'string' && val.length < 300) {
+                        html += `<div class="meta"><strong>${key}:</strong> ${val}</div>`;
+                    }
+                }
+            }
+            html += '</div>';
+        }
+    } else if (result.data && typeof result.data === 'object') {
+        html += `<pre style="white-space: pre-wrap; font-size: 0.85rem;">${JSON.stringify(result.data, null, 2)}</pre>`;
+    } else if (result.raw) {
+        html += `<pre style="white-space: pre-wrap; font-size: 0.85rem;">${result.raw}</pre>`;
+    }
+
+    html += '</div>';
+    return html;
+}
+</script>
+{% endblock %}

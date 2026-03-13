@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Twitter Optimizer{% endblock %}
+{% block content %}
+<h2>Dashboard</h2>
+<p>Data: <strong>{{ upload.filename }}</strong> ({{ upload.row_count }} posts)</p>
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="number">{{ "{:,}".format(analysis.summary.total_impressions) }}</div>
+        <div class="label">Total Impressions</div>
+    </div>
+    <div class="stat-card">
+        <div class="number">{{ analysis.summary.total_posts }}</div>
+        <div class="label">Posts Analyzed</div>
+    </div>
+    <div class="stat-card">
+        <div class="number">{{ analysis.summary.avg_impressions }}</div>
+        <div class="label">Avg Impressions</div>
+    </div>
+    <div class="stat-card">
+        <div class="number">{{ analysis.summary.total_follows }}</div>
+        <div class="label">New Followers</div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+    <div>
+        <h4>Top Posts by Impressions</h4>
+        {% for post in analysis.top_by_impressions[:5] %}
+        <div class="tweet-card">
+            <div class="tweet-text">{{ post['Post text'][:150] }}{% if post['Post text']|length > 150 %}...{% endif %}</div>
+            <div class="meta">
+                {{ "{:,}".format(post.Impressions) }} impressions &middot;
+                {{ post.Likes }} likes &middot;
+                {{ post['New follows'] }} follows &middot;
+                <span class="badge badge-{{ post.post_type }}">{{ post.post_type }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div>
+        <h4>Quick Actions</h4>
+        <div class="card">
+            <p><a href="/experiments" role="button">Run Experiments</a></p>
+            <p>Generate optimized tweets, reply templates, and posting schedules.</p>
+        </div>
+        <div class="card">
+            <p><a href="/suggestions" role="button" class="secondary">Get Today's Suggestions</a></p>
+            <p>AI-generated posts optimized for today's day of week.</p>
+        </div>
+        <div class="card">
+            <p><a href="/upload" role="button" class="outline">Upload New Data</a></p>
+            <p>Upload fresh analytics to update your profile.</p>
+        </div>
+
+        {% if suggestions %}
+        <h4 style="margin-top: 1.5rem;">Unused Suggestions</h4>
+        {% for s in suggestions %}
+        <div class="tweet-card">
+            <div class="tweet-text">{{ s.tweet_text[:120] }}{% if s.tweet_text|length > 120 %}...{% endif %}</div>
+            <div class="meta">
+                <span class="badge badge-{{ s.target_metric }}">{{ s.target_metric }}</span>
+                {{ s.strategy }}
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
