@@ -1,0 +1,265 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 420px;
+  min-height: 300px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  color: #e7e9ea;
+  background: #15202b;
+  padding: 16px;
+}
+
+h1 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Form elements */
+.form-group {
+  margin-bottom: 12px;
+}
+
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #8899a6;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+textarea, input[type="text"], input[type="password"] {
+  width: 100%;
+  padding: 10px 12px;
+  background: #192734;
+  border: 1px solid #38444d;
+  border-radius: 8px;
+  color: #e7e9ea;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+
+textarea:focus, input:focus {
+  outline: none;
+  border-color: #1d9bf0;
+}
+
+textarea::placeholder, input::placeholder {
+  color: #536471;
+}
+
+/* Buttons */
+.btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+}
+
+.btn-primary {
+  background: #1d9bf0;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #1a8cd8;
+}
+
+.btn-primary:disabled {
+  background: #1d9bf044;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #273340;
+  color: #1d9bf0;
+}
+
+.btn-secondary:hover {
+  background: #2c3e50;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: #8899a6;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.btn-ghost:hover {
+  background: #1d9bf015;
+  color: #1d9bf0;
+}
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  color: #8899a6;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 50%;
+  transition: all 0.15s;
+}
+
+.icon-btn:hover {
+  background: #1d9bf015;
+  color: #1d9bf0;
+}
+
+/* Output */
+#output-section {
+  margin-top: 14px;
+}
+
+.output-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.char-count {
+  font-size: 12px;
+  color: #536471;
+}
+
+.char-count.over {
+  color: #f4212e;
+  font-weight: 600;
+}
+
+#reply-output {
+  background: #192734;
+  border: 1px solid #38444d;
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 60px;
+  max-height: 200px;
+  overflow-y: auto;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+#reply-output:focus {
+  outline: none;
+  border-color: #1d9bf0;
+}
+
+.action-bar {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.iterate-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.iterate-row input {
+  flex: 1;
+}
+
+/* Loading */
+#loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  color: #8899a6;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #38444d;
+  border-top-color: #1d9bf0;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error */
+#error {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: #f4212e18;
+  border: 1px solid #f4212e44;
+  border-radius: 8px;
+  color: #f4212e;
+  font-size: 13px;
+}
+
+/* Settings */
+#settings-panel {
+  padding: 0;
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+/* Copied toast */
+.toast {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1d9bf0;
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  animation: fadeInOut 1.5s ease;
+  pointer-events: none;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  20% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}

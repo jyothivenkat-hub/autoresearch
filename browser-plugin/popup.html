@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>X Reply Generator</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <!-- Settings Panel -->
+  <div id="settings-panel" class="hidden">
+    <div class="settings-header">
+      <h2>Settings</h2>
+      <button id="close-settings" class="icon-btn">&times;</button>
+    </div>
+    <div class="form-group">
+      <label for="api-key">Claude API Key</label>
+      <input type="password" id="api-key" placeholder="sk-ant-...">
+    </div>
+    <div class="form-group">
+      <label for="persona">Your writing style / persona (optional)</label>
+      <textarea id="persona" rows="3" placeholder="e.g. I write about AI and startups. Keep replies concise, no fluff. Contrarian when warranted."></textarea>
+    </div>
+    <button id="save-settings" class="btn btn-primary">Save</button>
+  </div>
+
+  <!-- Main Panel -->
+  <div id="main-panel">
+    <div class="header">
+      <h1>X Reply</h1>
+      <button id="open-settings" class="icon-btn" title="Settings">&#9881;</button>
+    </div>
+
+    <!-- Input -->
+    <div class="form-group">
+      <label for="tweet-input">Paste the tweet</label>
+      <textarea id="tweet-input" rows="5" placeholder="Paste the tweet you want to reply to..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="direction">Direction (optional)</label>
+      <input type="text" id="direction" placeholder="e.g. agree and add nuance, push back, keep it short">
+    </div>
+
+    <button id="generate-btn" class="btn btn-primary">Generate Reply</button>
+
+    <!-- Output -->
+    <div id="output-section" class="hidden">
+      <div class="output-header">
+        <label>Generated Reply</label>
+        <div class="char-count"><span id="char-count">0</span>/280</div>
+      </div>
+      <div id="reply-output" contenteditable="true"></div>
+
+      <div class="action-bar">
+        <button id="copy-btn" class="btn btn-secondary">Copy</button>
+        <button id="shorter-btn" class="btn btn-ghost">Shorter</button>
+        <button id="casual-btn" class="btn btn-ghost">More casual</button>
+        <button id="spicier-btn" class="btn btn-ghost">Spicier</button>
+        <button id="regen-btn" class="btn btn-ghost">Regenerate</button>
+      </div>
+
+      <!-- Iterate -->
+      <div class="iterate-row">
+        <input type="text" id="iterate-input" placeholder="Adjust: e.g. make it funnier, add a question...">
+        <button id="iterate-btn" class="btn btn-primary btn-sm">Go</button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="hidden">
+      <div class="spinner"></div>
+      <span>Generating...</span>
+    </div>
+
+    <!-- Error -->
+    <div id="error" class="hidden"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
